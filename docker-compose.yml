@@ -13,23 +13,19 @@ services:
       - "4173:4173"
     environment:
       - NODE_ENV=development
-    depends_on:
-      - backend
 
   backend:
     build:
       context: ./backend
       target: development
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/backend
+    tty: true
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    env_file: .env
-    depends_on:
-      - db
+      - "5555:5555"  # ホストのポート5555をコンテナのポート5555にフォワーディング
+      - "5001:5001"  # Firebase Functions のデフォルトポート
+      - "4000:4000"  # Firebase Emulator UI のポート
+      - "9099:9099"  # Firebase Auth のポート
 
   db:
     image: postgres:14-alpine
