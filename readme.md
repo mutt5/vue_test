@@ -66,7 +66,7 @@ python -m venv venv && . venv/bin/activate && pip install -r requirements.txt
 
 ### **4.1 Firebase にログイン**
 
-コンテナ内で Firebase CLI にログインします。
+`backend`コンテナ内で Firebase CLI にログインします。
 
 ```sh
 firebase login --no-localhost
@@ -111,7 +111,7 @@ firebase deploy --only functions
 
 ### **5.1 Firebase にログイン**
 
-コンテナ内で Firebase CLI にログインします。
+`frontend`コンテナ内で Firebase CLI にログインします。
 
 ```sh
 firebase login --no-localhost
