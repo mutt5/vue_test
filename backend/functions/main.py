@@ -11,73 +11,65 @@ initialize_app()
 # Firestoreクライアントの初期化
 db = firestore.client()
 
-@identity_fn.before_user_created(region="asia-northeast1")
-def create_user_profile(event: AuthBlockingEvent) -> BeforeSignInResponse | None:
+@https_fn.on_call(region="asia-northeast1")
+def create_user_profile(req: https_fn.CallableRequest) -> dict | None:
     """
-    初回サインイン前にFirestoreを確認し、
+    初回サインイン時にFirestoreを確認し、
     まだユーザープロファイルが存在しなければ作成する。
     """
-    user = event.data
-    user_doc_ref = db.collection('users').document(user.uid)
+    uid = req.auth.uid
+    name = req.auth.token.get("name", "")
+    email = req.auth.token.get("email", "")
+    user_doc_ref = db.collection('users').document(uid)
     
-    print(f"サインインイベント発生: UID = {user.uid}")
+    print(f"サインインイベント発生: UID = {uid}")
     
     if not user_doc_ref.get().exists:
-        print(f"新規ユーザーを検出: {user.email}")
+        print(f"新規ユーザーを検出: {email}")
         # Firestoreにユーザーデータを保存
         user_data = {
-            'uid': user.uid,
-            'email': user.email,
-            'displayName': user.display_name,
+            'uid': uid,
+            'email': email,
+            'displayName': name,
             'createdAt': firestore.SERVER_TIMESTAMP,
             'updatedAt': firestore.SERVER_TIMESTAMP
         }
         user_doc_ref.set(user_data)
         print(f"ユーザープロファイルを作成: {user_data}")
     else:
-        print(f"既存ユーザーのサインイン: {user.email}")
+        print(f"既存ユーザーのサインイン: {uid}")
     
     # 今回はユーザー情報を上書き・ブロックしないので None を返す
     return None
 
 
-@https_fn.on_request(region="asia-northeast1")
-def get_user_profile(req: https_fn.Request) -> https_fn.Response:
+@https_fn.on_call(region="asia-northeast1")
+def get_user_profile(req: https_fn.CallableRequest) -> dict:
     """
     ユーザープロファイルを取得するエンドポイント
     """
-    # GETメソッドのみ許可
-    if req.method != 'GET':
-        return https_fn.Response(
-            status=405,
-            response={'error': 'Method not allowed'}
-        )
-    
-    # クエリパラメータからuidを取得
-    uid = req.args.get('uid')
+    # リクエストデータからuidを取得
+    uid = req.data.get('uid')
     if not uid:
-        return https_fn.Response(
-            status=400,
-            response={'error': 'User ID is required'}
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message='User ID is required'
         )
     
     try:
         # ユーザードキュメントの取得
         user_doc = db.collection('users').document(uid).get()
         if not user_doc.exists:
-            return https_fn.Response(
-                status=404,
-                response={'error': 'User not found'}
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.NOT_FOUND,
+                message='User not found'
             )
         
         # ユーザーデータを返す
-        return https_fn.Response(
-            response=user_doc.to_dict(),
-            headers={'Content-Type': 'application/json'}
-        )
+        return user_doc.to_dict()
         
     except Exception as e:
-        return https_fn.Response(
-            status=500,
-            response={'error': str(e)}
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=str(e)
         )
