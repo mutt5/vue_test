@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { useFirebaseAuth } from '@/composables/useFirebaseAuth'
 import GoogleLoginButton from '@/components/GoogleLoginButton.vue'
+import { createUserProfile } from '@/api/create_user_profile'
 
 const { handleGoogleLogin } = useFirebaseAuth()
+const handleLogin = async () => {
+  await handleGoogleLogin(() => createUserProfile())
+}
+
 </script>
 
 <template>
@@ -10,7 +15,7 @@ const { handleGoogleLogin } = useFirebaseAuth()
     <div class="login-card">
       <h1 class="login-title">ようこそ</h1>
       <div class="button-container">
-        <GoogleLoginButton :onClick="handleGoogleLogin" />
+        <GoogleLoginButton :onClick="handleLogin" />
       </div>
       <p class="login-subtitle">アカウントにログインして始めましょう</p>
     </div>
