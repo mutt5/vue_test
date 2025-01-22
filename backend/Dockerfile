@@ -35,6 +35,3 @@ ENV PATH $PATH:/google-cloud-sdk/bin
 
 # 作業ディレクトリの設定
 WORKDIR /backend
-
-# Functionsディレクトリの作成とファイルのコピー
-COPY functions/requirements.txt /backend/functions/

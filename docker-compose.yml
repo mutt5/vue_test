@@ -1,18 +1,14 @@
-version: '3.8'
-
 services:
   frontend:
     build: 
       context: ./frontend
       target: development
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/frontend
+    tty: true
     ports:
       - "5173:5173"
       - "4173:4173"
-    environment:
-      - NODE_ENV=development
 
   backend:
     build:
@@ -26,18 +22,3 @@ services:
       - "5001:5001"  # Firebase Functions のデフォルトポート
       - "4000:4000"  # Firebase Emulator UI のポート
       - "9099:9099"  # Firebase Auth のポート
-
-  db:
-    image: postgres:14-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5432:5432"
-
-volumes:
-  postgres_data:
