@@ -22,6 +22,7 @@ const toggleMenu = () => {
         <span :class="{ 'hamburger-line': true, open: isOpen }" />
       </button>
 
+      <div class="overlay" v-if="isOpen" @click="isOpen = false"></div>
       <div :class="{ 'nav-menu': true, open: isOpen }">
         <RouterLink to="/" @click="isOpen = false">Home</RouterLink>
         <RouterLink to="/about" @click="isOpen = false">About</RouterLink>
@@ -42,9 +43,9 @@ const toggleMenu = () => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 1000; /* より高い値に設定 */
   padding: 1rem;
-  height: 4rem; /* nav-wrapperと同じ高さ */
+  height: 4rem;
   background-color: var(--color-background);
 }
 
@@ -58,7 +59,8 @@ const toggleMenu = () => {
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 10;
+  position: relative; /* 追加 */
+  z-index: 1002; /* nav-containerの中で最前面 */
 }
 
 .hamburger-line {
@@ -81,22 +83,34 @@ const toggleMenu = () => {
   transform: translateY(-11px) rotate(-45deg);
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* nav-containerと同じ */
+}
+
 .nav-menu {
   position: fixed;
   top: 0;
-  right: -250px;
+  left: -250px;
   width: 250px;
   height: 100vh;
-  background-color: black;
+  background-color: var(--color-background);
   padding: 60px 20px;
-  transition: right 0.3s ease-in-out;
+  transition: left 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1001; /* オーバーレイより上、ハンバーガーより下 */
 }
 
 .nav-menu.open {
-  right: 0;
+  left: 0;
 }
 
 .nav-menu a {
