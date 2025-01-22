@@ -39,6 +39,10 @@ export const useFirebaseAuth = () => {
     })
   }
 
+  const getCurrentUser = () => {
+    return firebaseAuth.currentUser
+  }
+
   const logout = async () => {
     try {
       await firebaseAuth.signOut()
@@ -52,5 +56,6 @@ export const useFirebaseAuth = () => {
     handleGoogleLogin,
     initAuth,
     logout,
+    getCurrentUser
   }
 }
